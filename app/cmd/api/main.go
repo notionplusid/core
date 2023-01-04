@@ -95,8 +95,9 @@ func main() {
 	}(ctx, env.Notion.ProcWss)
 
 	h, err := http.New(ctx, http.Dep{
-		Tenant: tenant,
-		Table:  table,
+		Tenant:     tenant,
+		Table:      table,
+		IsInternal: env.Notion.ExtMode == NotionExtModeInternal,
 	})
 	if err != nil {
 		log.Fatalf("HTTP Handler: %s", err)

@@ -15,6 +15,8 @@ import (
 type Dep struct {
 	Tenant *service.Tenant
 	Table  *service.Table
+
+	IsInternal bool
 }
 
 // Validate the Dep.

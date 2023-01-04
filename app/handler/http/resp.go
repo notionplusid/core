@@ -13,6 +13,7 @@ type HTTPErrCode string
 const (
 	HTTPErrCodeInternalError HTTPErrCode = "internal_server_error"
 	HTTPErrCodeUnauthorized  HTTPErrCode = "unauthorized"
+	HTTPErrCodeGone          HTTPErrCode = "gone"
 
 	HTTPErrCodeUnfillableTable HTTPErrCode = "unfillable_table"
 	HTTPErrCodeNoTables        HTTPErrCode = "no_tables"

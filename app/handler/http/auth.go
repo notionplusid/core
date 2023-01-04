@@ -10,6 +10,15 @@ import (
 // GetAuth registers the entity and allows to start watching
 // the new tables.
 func (h *Handler) GetAuth(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	if h.d.IsInternal {
+		WriteHTTPErr(w, http.StatusGone, NewHTTPErr(
+			HTTPErrCodeGone,
+			"Application is running in `internal` mode",
+			"This endpoint is meant to be used only for the public setup",
+		))
+		return
+	}
+
 	code := r.URL.Query().Get("code")
 	if len(code) == 0 {
 		WriteHTTPErr(w, http.StatusUnprocessableEntity, NewHTTPErr(
