@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	autocounter "github.com/notionplusid/core/main"
+	autocounter "github.com/notionplusid/core/app"
 )
 
 const maxDBQueryPageSize = 100

@@ -11,11 +11,11 @@ import (
 	"syscall"
 	"time"
 
-	autocounter "github.com/notionplusid/core/main"
-	"github.com/notionplusid/core/main/handler/http"
-	"github.com/notionplusid/core/main/provider/notion"
-	"github.com/notionplusid/core/main/service"
-	"github.com/notionplusid/core/main/storage/datastore"
+	autocounter "github.com/notionplusid/core/app"
+	"github.com/notionplusid/core/app/handler/http"
+	"github.com/notionplusid/core/app/provider/notion"
+	"github.com/notionplusid/core/app/service"
+	"github.com/notionplusid/core/app/storage/datastore"
 )
 
 const (

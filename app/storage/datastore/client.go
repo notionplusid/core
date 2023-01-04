@@ -9,8 +9,8 @@ import (
 
 	datastoresdk "cloud.google.com/go/datastore"
 
-	autocounter "github.com/notionplusid/core/main"
-	"github.com/notionplusid/core/main/storage"
+	autocounter "github.com/notionplusid/core/app"
+	"github.com/notionplusid/core/app/storage"
 )
 
 const (

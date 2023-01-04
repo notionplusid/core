@@ -8,7 +8,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
-	"github.com/notionplusid/core/main/service"
+	"github.com/notionplusid/core/app/service"
 )
 
 // Dep is a dependencies structure that is expected for the Handler to function.

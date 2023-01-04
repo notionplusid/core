@@ -1,4 +1,4 @@
-module github.com/notionplusid/core/main
+module github.com/notionplusid/core/app
 
 go 1.19
 

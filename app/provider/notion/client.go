@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	autocounter "github.com/notionplusid/core/main"
+	autocounter "github.com/notionplusid/core/app"
 )
 
 const defaultNotionAPIVersion = "2022-06-28"

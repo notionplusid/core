@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 
-	autocounter "github.com/notionplusid/core/main"
+	autocounter "github.com/notionplusid/core/app"
 )
 
 // ProcWssFunc is the processing handler of the set of workspaces returned from the database.

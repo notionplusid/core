@@ -7,9 +7,9 @@ import (
 	"log"
 	"sync"
 
-	autocounter "github.com/notionplusid/core/main"
-	"github.com/notionplusid/core/main/provider/notion"
-	"github.com/notionplusid/core/main/storage"
+	autocounter "github.com/notionplusid/core/app"
+	"github.com/notionplusid/core/app/provider/notion"
+	"github.com/notionplusid/core/app/storage"
 )
 
 const defaultBatchSize = 100
