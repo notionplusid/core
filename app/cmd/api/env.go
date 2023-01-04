@@ -69,6 +69,7 @@ type Env struct {
 	Notion struct {
 		ClientID     string
 		ClientSecret string
+		RedirectURI  string
 		ExtMode      NotionExtMode
 
 		// amount of workspaces processed in one go.
@@ -97,6 +98,8 @@ func NewEnv(ctx context.Context) (Env, error) {
 	if err := e.Notion.ExtMode.Validate(); err != nil {
 		return Env{}, err
 	}
+
+	e.Notion.RedirectURI = os.Getenv("NOTION_REDIRECT_URI")
 
 	procWssCount, err := strconv.ParseInt(os.Getenv("NOTION_PROC_WSS_COUNT"), 10, 64)
 	if err != nil {

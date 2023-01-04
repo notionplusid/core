@@ -46,6 +46,7 @@ func main() {
 	tenant, err := service.NewTenant(ds, notion.ExtConfig{
 		ClientID:     env.Notion.ClientID,
 		ClientSecret: env.Notion.ClientSecret,
+		RedirectURI:  env.Notion.RedirectURI,
 	})
 	if err != nil {
 		log.Fatalf("Tenant Service: %s", err)

@@ -27,6 +27,7 @@ type OAuth2Res struct {
 type ExtConfig struct {
 	ClientID     string
 	ClientSecret string
+	RedirectURI  string
 }
 
 // Validate the ExtConfig.
@@ -36,6 +37,8 @@ func (e *ExtConfig) Validate() error {
 		return errors.New("client id is required")
 	case e.ClientSecret == "":
 		return errors.New("client secret is required")
+	case e.RedirectURI == "":
+		return errors.New("redirect uri is required")
 	}
 
 	return nil
@@ -59,7 +62,7 @@ func OAuth2(ctx context.Context, code string, config ExtConfig) (OAuth2Res, erro
 	bs, err := json.Marshal(&reqBody{
 		GrantType:   "authorization_code",
 		Code:        code,
-		RedirectURI: "http://localhost:8080/v1/auth",
+		RedirectURI: config.RedirectURI,
 	})
 	if err != nil {
 		return OAuth2Res{}, err

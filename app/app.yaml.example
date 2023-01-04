@@ -10,4 +10,5 @@ env_variables:
   NOTION_EXT_MODE: "internal"
   GCLOUD_LOCATION_ID: "us-east2"
   ENV: "appengine"
+  NOTION_REDIRECT_URI: "dummy"
 instance_class: F1
