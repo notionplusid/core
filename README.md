@@ -4,8 +4,7 @@
 
 This repository is the source code for the Notion Plus ID utility. The provided code is used both for the publicly available and convinient version. Also it can be used to run a private version for people/organisations that may require higher control over security and used resources.
 
-<video src="https://uploads-ssl.webflow.com/63902c937507a1fd02bd0421/63902cf9e99b23070c4232c2_autocounter-transcode.mp4" controls="controls" style="max-width: 730px;">
-</video>
+![Demo](./docs/video.gif)
 
 ## How to run private Notion Plus ID for free
 ### 1. Setup the infrastructure
