@@ -1,0 +1,5 @@
+.terraform
+.terraform.lock.hcl
+*.tfplan
+backend.conf
+config.yaml

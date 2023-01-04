@@ -1,0 +1,13 @@
+runtime: go119
+main: github.com/notionplusid/core/main/cmd/api
+automatic_scaling:
+  min_instances: 1
+  max_instances: 1
+inbound_services:
+  - warmup
+env_variables:
+  GCLOUD_PROJECT_ID: "myorg-plusid"
+  NOTION_EXT_MODE: "internal"
+  GCLOUD_LOCATION_ID: "us-east2"
+  ENV: "appengine"
+instance_class: F1
