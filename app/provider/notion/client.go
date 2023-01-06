@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	autocounter "github.com/notionplusid/core/app"
+	"github.com/notionplusid/core/app/internal/ratelimiter"
 )
 
 const defaultNotionAPIVersion = "2022-06-28"
@@ -25,7 +27,10 @@ func NewClient(bearerToken string) (*Notion, error) {
 
 	return &Notion{
 		bearer: bearerToken,
-		http:   &http.Client{},
+		http: &http.Client{
+			// as expected per Notion API: https://developers.notion.com/reference/request-limits
+			Transport: ratelimiter.NewThrottledTransport(time.Second, 3, http.DefaultTransport),
+		},
 	}, nil
 }
 
