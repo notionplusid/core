@@ -13,7 +13,7 @@ import (
 )
 
 const defaultBatchSize = 100
-const defaultUpdateChunkSize = 20
+const defaultUpdateChunkSize = 3
 
 // Table service.
 type Table struct {
