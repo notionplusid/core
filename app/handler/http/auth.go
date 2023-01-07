@@ -43,5 +43,6 @@ func (h *Handler) GetAuth(w http.ResponseWriter, r *http.Request, _ httprouter.P
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	w.WriteHeader(http.StatusFound)
+	w.Header().Add("Location", "https://notionplusid.app/welcome")
 }
