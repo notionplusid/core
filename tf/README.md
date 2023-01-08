@@ -55,4 +55,4 @@ The script would prompt you for `Notion Client Secret`. Just provide the value o
 
 If you would like to reapply/change the terraform configuration, simply rerun the `run.sh`.
 
-After everything is applied, you can now move to the installation of the App Engine component.
+After everything is applied, you can now move to the installation of the [App Engine component](../app/README.md).

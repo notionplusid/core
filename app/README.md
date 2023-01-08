@@ -24,3 +24,6 @@ gcloud app deploy --version v1
 ```
 
 And follow the instructions.
+
+### 4. Set up your Notion database
+Follow up the [instructions](https://notionplusid.app/welcome) on the website

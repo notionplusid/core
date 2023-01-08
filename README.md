@@ -17,7 +17,7 @@ The main logic is written in Go and is designed to run in a Docker container.
 
 The current implementation is also optimised for [GCP App Engine](https://cloud.google.com/appengine) runtime with the usage of [GCP Datastore (Firestore)](https://cloud.google.com/datastore). The default configuration would allow you to run the Notion Plus ID **for free** as the typical resource consumption is within the App Engine's [Free Tier](https://cloud.google.com/free/docs/free-cloud-features#app-engine).
 
-More detailed steps [here](./main/README.md).
+More detailed steps [here](./app/README.md).
 
 ### 3. Enable the Notion Plus ID for your Notion database
 You need to make sure that your database is configured for Notion Plus ID to work.
