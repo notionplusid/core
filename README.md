@@ -22,7 +22,7 @@ More detailed steps [here](./main/README.md).
 ### 3. Enable the Notion Plus ID for your Notion database
 You need to make sure that your database is configured for Notion Plus ID to work.
 
-More details [here](https://notionplusid.app/howto).
+More details [here](https://notionplusid.app/welcome).
 
 ## Structure of the repository
 | Module | Path              | Description                                       |
