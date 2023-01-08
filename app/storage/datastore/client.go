@@ -72,15 +72,16 @@ func (c *Client) StoreWorkspace(ctx context.Context, ws autocounter.Workspace) (
 	return ws, nil
 }
 
-// ListAllTables stored in the database for the workspace.
-func (c *Client) ListAllTables(ctx context.Context, workspaceID string) ([]autocounter.Table, error) {
+// ListAllActiveTables stored in the database for the workspace.
+func (c *Client) ListAllActiveTables(ctx context.Context, workspaceID string) ([]autocounter.Table, error) {
 	if workspaceID == "" {
 		return nil, errors.New("workspace id is required")
 	}
 
 	key := datastoresdk.
 		NewQuery(tableKey).
-		FilterField("WorkspaceID", "=", workspaceID)
+		FilterField("WorkspaceID", "=", workspaceID).
+		FilterField("Status", "=", autocounter.StatusActive)
 
 	var res []autocounter.Table
 	_, err := c.ds.GetAll(ctx, key, &res)
@@ -152,8 +153,8 @@ func (c *Client) StoreTable(ctx context.Context, workspaceID string, table autoc
 	return table, nil
 }
 
-// RegisteredTables returns the subset of table IDs from the provided list that are registered.
-func (c *Client) RegisteredTables(ctx context.Context, workspaceID string, tableIDs []string) ([]string, error) {
+// ActiveTables returns the subset of table IDs from the provided list that are active.
+func (c *Client) ActiveTables(ctx context.Context, workspaceID string, tableIDs []string) ([]string, error) {
 	var keys []*datastoresdk.Key
 	for _, t := range tableIDs {
 		keys = append(keys, datastoresdk.NameKey(tableKey, t, nil))
@@ -184,6 +185,10 @@ func (c *Client) RegisteredTables(ctx context.Context, workspaceID string, table
 	for _, t := range res {
 		// in case if such ID is registered with another workspace.
 		if t.WorkspaceID != workspaceID {
+			continue
+		}
+
+		if t.Status != autocounter.StatusActive {
 			continue
 		}
 

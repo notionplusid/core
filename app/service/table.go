@@ -82,9 +82,9 @@ func validateExpectedDatabaseParam(db notion.Database, paramName string) error {
 	return nil
 }
 
-// Registered returns the list of table IDs that are registered for the provided workspace.
-func (t *Table) Registered(ctx context.Context, workspaceID string, tableIDs []string) ([]string, error) {
-	return t.s.RegisteredTables(ctx, workspaceID, tableIDs)
+// Active returns the list of table IDs that are registered and active for the provided workspace.
+func (t *Table) Active(ctx context.Context, workspaceID string, tableIDs []string) ([]string, error) {
+	return t.s.ActiveTables(ctx, workspaceID, tableIDs)
 }
 
 // Register the Table within the Workspace for further scans and autocounter fills.
@@ -162,9 +162,9 @@ func hasIDProperty(t notion.Database, prop string, ptype notion.PropertyType) er
 	return autocounter.ErrIncompatibleTable
 }
 
-// ListAll tables for the provided Workspace ID.
-func (t *Table) ListAll(ctx context.Context, workspaceID string) ([]autocounter.Table, error) {
-	return t.s.ListAllTables(ctx, workspaceID)
+// ListAllActive tables for the provided Workspace ID.
+func (t *Table) ListAllActive(ctx context.Context, workspaceID string) ([]autocounter.Table, error) {
+	return t.s.ListAllActiveTables(ctx, workspaceID)
 }
 
 // Disable the Table from the Workspace by the table ID.
@@ -319,10 +319,10 @@ func chunkSlice(slice []notion.Page, chunkSize int) [][]notion.Page {
 	return chunks
 }
 
-// UnregisteredDiff returns a list of tables that aren't registered for the autofill.
+// NonActiveDiff returns a list of tables that aren't registered or not active for the autofill.
 // The new tables normally appear if customer decides to observe a new table,
 // or at the first time the workspace is registered.
-func (t *Table) UnregisteredDiff(ctx context.Context, ws autocounter.Workspace) ([]autocounter.Table, error) {
+func (t *Table) NonActiveDiff(ctx context.Context, ws autocounter.Workspace) ([]autocounter.Table, error) {
 	// fetch all the available tables from the tenant.
 	tables, err := t.Available(ctx, ws)
 	if err != nil {
@@ -334,8 +334,8 @@ func (t *Table) UnregisteredDiff(ctx context.Context, ws autocounter.Workspace) 
 		tableIDs = append(tableIDs, t.ID)
 	}
 
-	// find the subset of registered tables.
-	reg, err := t.Registered(ctx, ws.ID, tableIDs)
+	// find the subset of active tables.
+	reg, err := t.Active(ctx, ws.ID, tableIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -381,8 +381,10 @@ func (t *Table) RegisterConc(ctx context.Context, ts []autocounter.Table) {
 
 // ProcWs in concurrent manner.
 func (t *Table) ProcWs(ctx context.Context, ws autocounter.Workspace) (autocounter.Workspace, error) {
-	ts, err := t.ListAll(ctx, ws.ID)
-	if err != nil {
+	ts, err := t.ListAllActive(ctx, ws.ID)
+	switch {
+	case err == autocounter.ErrNoResults:
+	case err != nil:
 		return autocounter.Workspace{}, fmt.Errorf("workspace %s: couldn't process tables: %w", ws.ID, err)
 	}
 
@@ -392,7 +394,7 @@ func (t *Table) ProcWs(ctx context.Context, ws autocounter.Workspace) (autocount
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		ts, err := t.UnregisteredDiff(ctx, ws)
+		ts, err := t.NonActiveDiff(ctx, ws)
 		if err != nil {
 			log.Printf("Table service: workspace %s: couldn't fetch unregistered tables: %s", ws.ID, err)
 			return

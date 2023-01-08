@@ -58,18 +58,18 @@ func (t *Tenant) RegisterWorkspace(ctx context.Context, ws autocounter.Workspace
 
 // ProcOldestUpdated consistently processes the tenants that were processed the longest ago.
 func (t *Tenant) ProcOldestUpdated(ctx context.Context, count int64, procWs ProcWsFunc) error {
-	return t.s.ProcOldestUpdatedWss(ctx, count, func(ctx context.Context, ts ...autocounter.Workspace) error {
+	return t.s.ProcOldestUpdatedWss(ctx, count, func(ctx context.Context, wss ...autocounter.Workspace) error {
 		wg := &sync.WaitGroup{}
-		for _, t := range ts {
+		for _, ws := range wss {
 			wg.Add(1)
-			go func(t autocounter.Workspace) {
+			go func(ws autocounter.Workspace) {
 				defer wg.Done()
 
-				_, err := procWs(ctx, t)
+				_, err := procWs(ctx, ws)
 				if err != nil {
-					log.Printf("Tenant: ProcOldestUpdated: ProcOldestUpdatedWss: couldn't process workspace %s: %s", t.ID, err)
+					log.Printf("Tenant: ProcOldestUpdated: ProcOldestUpdatedWss: couldn't process workspace %s: %s", ws.ID, err)
 				}
-			}(t)
+			}(ws)
 		}
 		wg.Wait()
 		return nil

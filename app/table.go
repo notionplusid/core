@@ -9,7 +9,7 @@ import (
 const DefaultTableParamName = "PlusID"
 
 // Status of the Table observation.
-type Status string
+type Status = string
 
 // Known statuses.
 const (

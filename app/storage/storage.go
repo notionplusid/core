@@ -18,6 +18,6 @@ type Storage interface {
 
 	StoreTable(ctx context.Context, workspaceID string, table autocounter.Table) (autocounter.Table, error)
 	DisableTable(ctx context.Context, wsID, tableID string) error
-	RegisteredTables(ctx context.Context, workspaceID string, tableIDs []string) ([]string, error)
-	ListAllTables(ctx context.Context, workspaceID string) ([]autocounter.Table, error)
+	ActiveTables(ctx context.Context, workspaceID string, tableIDs []string) ([]string, error)
+	ListAllActiveTables(ctx context.Context, workspaceID string) ([]autocounter.Table, error)
 }
