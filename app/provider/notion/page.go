@@ -73,7 +73,7 @@ type PageProperty struct {
 		Start time.Time `json:"start"`
 		End   time.Time `json:"end,omitempty"`
 	} `json:"date,omitempty"`
-	People *User `json:"people,omitempty"`
+	People []User `json:"people,omitempty"`
 	Files  []struct {
 		Name string `json:"name"`
 	} `json:"files,omitempty"`
