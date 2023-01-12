@@ -395,7 +395,10 @@ func (t *Table) ProcWs(ctx context.Context, ws autocounter.Workspace) (autocount
 	go func() {
 		defer wg.Done()
 		ts, err := t.NonActiveDiff(ctx, ws)
-		if err != nil {
+		switch {
+		case err == autocounter.ErrNoResults:
+			return
+		case err != nil:
 			log.Printf("Table service: workspace %s: couldn't fetch unregistered tables: %s", ws.ID, err)
 			return
 		}
