@@ -70,8 +70,8 @@ type PageProperty struct {
 		Color string `json:"color"`
 	} `json:"multi_select,omitempty"`
 	Date *struct {
-		Start time.Time `json:"start"`
-		End   time.Time `json:"end,omitempty"`
+		Start string `json:"start"`
+		End   string `json:"end,omitempty"`
 	} `json:"date,omitempty"`
 	People []User `json:"people,omitempty"`
 	Files  []struct {
@@ -85,6 +85,67 @@ type PageProperty struct {
 	CreatedBy      *User      `json:"created_by,omitempty"`
 	LastEditedTime *time.Time `json:"last_edited_time,omitempty"`
 	LastEditedBy   *User      `json:"last_edited_by,omitempty"`
+}
+
+// PagePropertyDate format allows to cast the otherwise string formatted date property values.
+type PagePropertyDate struct {
+	// "2006-01-02"
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end,omitempty"`
+}
+
+// MarshalJSON implementation.
+func (p *PagePropertyDate) MarshalJSON() ([]byte, error) {
+	if p == nil {
+		return nil, nil
+	}
+
+	pRaw := struct {
+		Start string `json:"start"`
+		End   string `json:"end,omitempty"`
+	}{}
+	pRaw.Start = p.Start.Format("2006-01-02")
+	if !p.End.IsZero() {
+		pRaw.End = p.End.Format("2006-01-02")
+	}
+
+	return json.Marshal(pRaw)
+}
+
+// UnmarshalJSON implementation.
+func (p *PagePropertyDate) UnmarshalJSON(j []byte) error {
+	if p == nil {
+		return nil
+	}
+	if len(j) == 0 {
+		return nil
+	}
+
+	pRaw := struct {
+		Start string `json:"start"`
+		End   string `json:"end,omitempty"`
+	}{}
+	if err := json.Unmarshal(j, &pRaw); err != nil {
+		return nil
+	}
+
+	pStart, err := time.Parse("2006-01-02", pRaw.Start)
+	if err != nil {
+		return fmt.Errorf("couldn't parse Start: %w", err)
+	}
+	p.Start = pStart
+
+	if pRaw.End == "" {
+		return nil
+	}
+
+	pEnd, err := time.Parse("2006-01-02", pRaw.End)
+	if err != nil {
+		return fmt.Errorf("couldn't parse End: %w", err)
+	}
+	p.End = pEnd
+
+	return nil
 }
 
 type PatchPageReq struct {

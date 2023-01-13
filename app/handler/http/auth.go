@@ -43,6 +43,5 @@ func (h *Handler) GetAuth(w http.ResponseWriter, r *http.Request, _ httprouter.P
 		return
 	}
 
-	http.RedirectHandler("https://notionplusid.app/welcome", http.StatusFound).
-		ServeHTTP(w, r)
+	http.Redirect(w, r, "https://notionplusid.app/welcome", http.StatusFound)
 }
