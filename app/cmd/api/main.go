@@ -83,14 +83,14 @@ func main() {
 		var after <-chan time.Time
 		for {
 			after = time.After(2 * time.Second)
+			if err := tenant.ProcOldestUpdated(ctx, procWssCount, table.ProcWs); err != nil {
+				log.Printf("Worker: couldn't process tables: %s", err)
+			}
+
 			select {
 			case <-ctx.Done():
 				return
 			case <-after:
-			}
-
-			if err := tenant.ProcOldestUpdated(ctx, procWssCount, table.ProcWs); err != nil {
-				log.Printf("Worker: couldn't process tables: %s", err)
 			}
 		}
 	}(ctx, env.Notion.ProcWss)
