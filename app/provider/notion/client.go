@@ -43,6 +43,11 @@ func NewFromWorkspace(ws autocounter.Workspace) (*Notion, error) {
 	return NewClient(ws.Token)
 }
 
+// Close the client.
+func (n *Notion) Close() {
+	n.http.CloseIdleConnections()
+}
+
 // WithHTTPClient returns a new Notion instance with the provided property assigned as a HTTP Client
 // and uses for all the requests to the Notion API.
 // If client is nil - the new empty http Client will be used instead.

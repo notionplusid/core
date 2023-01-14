@@ -187,6 +187,7 @@ func (t *Table) Fill(ctx context.Context, tableID string, ws autocounter.Workspa
 	if err != nil {
 		return fmt.Errorf("couldn't initialize notion api client: %s", err)
 	}
+	defer notionCli.Close()
 
 	// fetch latest page number.
 	res, err := notionCli.QueryDatabase(ctx, tableID, notion.DBQueryReq{
