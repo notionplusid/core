@@ -38,14 +38,11 @@ type PageProperty struct {
 	RichText []RichText   `json:"rich_text,omitempty"`
 	Number   *float64     `json:"number,omitempty"`
 	Formula  *struct {
-		Type    string   `json:"type"`
-		String  *string  `json:"string,omitempty"`
-		Number  *float64 `json:"number,omitempty"`
-		Boolean *bool    `json:"boolean,omitempty"`
-		Date    *struct {
-			Start time.Time `json:"start"`
-			End   time.Time `json:"end,omitempty"`
-		} `json:"date,omitempty"`
+		Type    string            `json:"type"`
+		String  *string           `json:"string,omitempty"`
+		Number  *float64          `json:"number,omitempty"`
+		Boolean *bool             `json:"boolean,omitempty"`
+		Date    *PagePropertyDate `json:"date,omitempty"`
 	} `json:"formula,omitempty"`
 	Relation []struct {
 		ID string `json:"id"`
