@@ -48,13 +48,10 @@ type PageProperty struct {
 		ID string `json:"id"`
 	} `json:"relation,omitempty"`
 	Rollup *struct {
-		Type   string `json:"type"`
-		Number int64  `json:"number,omitempty"`
-		Date   *struct {
-			Start time.Time `json:"start"`
-			End   time.Time `json:"end,omitempty"`
-		} `json:"date,omitempty"`
-		Array []PageProperty `json:"array,omitempty"`
+		Type   string            `json:"type"`
+		Number int64             `json:"number,omitempty"`
+		Date   *PagePropertyDate `json:"date,omitempty"`
+		Array  []PageProperty    `json:"array,omitempty"`
 	} `json:"rollup,omitempty"`
 	Select *struct {
 		ID    string `json:"id,omitempty"`
@@ -66,11 +63,8 @@ type PageProperty struct {
 		Name  string `json:"name"`
 		Color string `json:"color"`
 	} `json:"multi_select,omitempty"`
-	Date *struct {
-		Start string `json:"start"`
-		End   string `json:"end,omitempty"`
-	} `json:"date,omitempty"`
-	People []User `json:"people,omitempty"`
+	Date   *PagePropertyDate `json:"date,omitempty"`
+	People []User            `json:"people,omitempty"`
 	Files  []struct {
 		Name string `json:"name"`
 	} `json:"files,omitempty"`

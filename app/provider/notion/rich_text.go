@@ -1,7 +1,5 @@
 package notion
 
-import "time"
-
 // RichText representation.
 type RichText struct {
 	PlainText   string `json:"plain_text"`
@@ -30,10 +28,7 @@ type RichText struct {
 		Database *struct {
 			ID string `json:"id"`
 		} `json:"database,omitempty"`
-		Date *struct {
-			Start time.Time `json:"start"`
-			End   time.Time `json:"end,omitempty"`
-		} `json:"date,omitempty"`
+		Date *PagePropertyDate `json:"date,omitempty"`
 	} `json:"mention,omitempty"`
 	Equation *struct {
 		Expression string `json:"expression"`
