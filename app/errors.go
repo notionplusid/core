@@ -10,4 +10,5 @@ var (
 	ErrInvalidTableParam error = errors.New("invalid table parameter")
 	ErrNoResults         error = errors.New("no results")
 	ErrIncompatibleTable error = errors.New("incompatbile table")
+	ErrUnauthorized      error = errors.New("unauthorized")
 )

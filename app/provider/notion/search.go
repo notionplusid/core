@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	autocounter "github.com/notionplusid/core/app"
 )
 
 const maxSearchPageSize = 100
@@ -268,6 +270,8 @@ func (n *Notion) Search(ctx context.Context, sReq SearchReq) (SearchRes, error) 
 
 	switch res.StatusCode {
 	case 200:
+	case 401:
+		return SearchRes{}, autocounter.ErrUnauthorized
 	default:
 		e, _ := io.ReadAll(res.Body)
 		return SearchRes{}, fmt.Errorf("unexpected error %d: %s", res.StatusCode, e)

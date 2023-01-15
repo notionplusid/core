@@ -56,6 +56,26 @@ func (t *Tenant) RegisterWorkspace(ctx context.Context, ws autocounter.Workspace
 	return t.s.StoreWorkspace(ctx, ws)
 }
 
+// IsAvailable returns error if there's a way to reach out the workspace.
+func (t *Tenant) IsAvailable(ctx context.Context, ws autocounter.Workspace) error {
+	n, err := notion.NewFromWorkspace(ws)
+	if err != nil {
+		return err
+	}
+	defer n.Close()
+
+	_, err = n.Me(ctx)
+	return err
+}
+
+// UnregisterWorkspace returns nil if deregistration was successful.
+func (t *Tenant) UnregisterWorkspace(ctx context.Context, wsID string) error {
+	if err := t.s.RemoveWorkspace(ctx, wsID); err != nil {
+		return err
+	}
+	return t.s.RemoveTablesFromWS(ctx, wsID)
+}
+
 // ProcOldestUpdated consistently processes the tenants that were processed the longest ago.
 func (t *Tenant) ProcOldestUpdated(ctx context.Context, count int64, procWs ProcWsFunc) error {
 	return t.s.ProcOldestUpdatedWss(ctx, count, func(ctx context.Context, wss ...autocounter.Workspace) error {
@@ -65,7 +85,17 @@ func (t *Tenant) ProcOldestUpdated(ctx context.Context, count int64, procWs Proc
 			go func(ws autocounter.Workspace) {
 				defer wg.Done()
 
-				_, err := procWs(ctx, ws)
+				err := t.IsAvailable(ctx, ws)
+				switch {
+				case err == autocounter.ErrUnauthorized:
+					if err = t.UnregisterWorkspace(ctx, ws.ID); err != nil {
+						log.Printf("Tenant: ProcOldestUpdated: ProcOldestUpdatedWss: couldn't unregister the workspace %s: %s", ws.ID, err)
+					}
+				case err != nil:
+					log.Printf("Tenant: ProcOldestUpdated: ProcOldestUpdatedWss: couldn't check the availability of the workspace %s: %s", ws.ID, err)
+				}
+
+				_, err = procWs(ctx, ws)
 				if err != nil {
 					log.Printf("Tenant: ProcOldestUpdated: ProcOldestUpdatedWss: couldn't process workspace %s: %s", ws.ID, err)
 				}

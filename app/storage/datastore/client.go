@@ -232,3 +232,39 @@ func (c *Client) ProcOldestUpdatedWss(ctx context.Context, count int64, procWss 
 	})
 	return err
 }
+
+// RemoveWorkspace for the Client.
+func (c *Client) RemoveWorkspace(ctx context.Context, wsID string) error {
+	if wsID == "" {
+		return errors.New("workspace id is required")
+	}
+
+	return c.ds.Delete(ctx, datastoresdk.NameKey(workspaceKey, wsID, nil))
+}
+
+// RemoveTablesFromWS clears up all the tables associated with the workspace ID.
+func (c *Client) RemoveTablesFromWS(ctx context.Context, wsID string) error {
+	if wsID == "" {
+		return errors.New("workspace id is required")
+	}
+
+	key := datastoresdk.
+		NewQuery(tableKey).
+		FilterField("WorkspaceID", "=", wsID)
+
+	var res []autocounter.Table
+	_, err := c.ds.GetAll(ctx, key, &res)
+	switch {
+	case err == datastoresdk.ErrNoSuchEntity:
+		return nil
+	case err != nil:
+		return err
+	}
+
+	var keys []*datastoresdk.Key
+	for _, t := range res {
+		keys = append(keys, datastoresdk.NameKey(tableKey, t.ID, nil))
+	}
+
+	return c.ds.DeleteMulti(ctx, keys)
+}
