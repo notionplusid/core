@@ -49,7 +49,7 @@ type PageProperty struct {
 	} `json:"relation,omitempty"`
 	Rollup *struct {
 		Type   string            `json:"type"`
-		Number int64             `json:"number,omitempty"`
+		Number float64           `json:"number,omitempty"`
 		Date   *PagePropertyDate `json:"date,omitempty"`
 		Array  []PageProperty    `json:"array,omitempty"`
 	} `json:"rollup,omitempty"`
