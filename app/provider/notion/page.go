@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	autocounter "github.com/notionplusid/core/app"
@@ -95,12 +96,27 @@ func (p *PagePropertyDate) MarshalJSON() ([]byte, error) {
 		Start string `json:"start"`
 		End   string `json:"end,omitempty"`
 	}{}
-	pRaw.Start = p.Start.Format("2006-01-02")
+
+	startFormat := "2006-01-02"
+	if onlyDate(p.Start) {
+		startFormat = time.RFC3339Nano
+	}
+	pRaw.Start = p.Start.Format(startFormat)
 	if !p.End.IsZero() {
-		pRaw.End = p.End.Format("2006-01-02")
+		endFormat := "2006-01-02"
+		if onlyDate(p.End) {
+			endFormat = time.RFC3339Nano
+		}
+		pRaw.End = p.End.Format(endFormat)
 	}
 
 	return json.Marshal(pRaw)
+}
+
+func onlyDate(t time.Time) bool {
+	t = t.UTC()
+	onlyDate := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
+	return t.Equal(onlyDate)
 }
 
 // UnmarshalJSON implementation.
@@ -120,7 +136,11 @@ func (p *PagePropertyDate) UnmarshalJSON(j []byte) error {
 		return nil
 	}
 
-	pStart, err := time.Parse("2006-01-02", pRaw.Start)
+	startFormat := "2006-01-02"
+	if strings.Contains(pRaw.Start, "T") {
+		startFormat = time.RFC3339Nano
+	}
+	pStart, err := time.Parse(startFormat, pRaw.Start)
 	if err != nil {
 		return fmt.Errorf("couldn't parse Start: %w", err)
 	}
@@ -130,7 +150,11 @@ func (p *PagePropertyDate) UnmarshalJSON(j []byte) error {
 		return nil
 	}
 
-	pEnd, err := time.Parse("2006-01-02", pRaw.End)
+	endFormat := "2006-01-02"
+	if strings.Contains(pRaw.End, "T") {
+		endFormat = time.RFC3339Nano
+	}
+	pEnd, err := time.Parse(endFormat, pRaw.End)
 	if err != nil {
 		return fmt.Errorf("couldn't parse End: %w", err)
 	}

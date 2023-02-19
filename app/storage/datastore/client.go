@@ -111,27 +111,24 @@ func (c *Client) Workspaces(ctx context.Context) ([]autocounter.Workspace, error
 
 // DisableTable instance.
 func (c *Client) DisableTable(ctx context.Context, wsID, tID string) error {
-	_, err := c.ds.RunInTransaction(ctx, func(tx *datastoresdk.Transaction) error {
-		key := datastoresdk.NameKey(tableKey, tID, nil)
+	key := datastoresdk.NameKey(tableKey, tID, nil)
 
-		var t autocounter.Table
-		err := tx.Get(key, &t)
-		switch {
-		case err == datastoresdk.ErrNoSuchEntity:
-			return autocounter.ErrNoResults
-		case err != nil:
-			return err
-		}
-
-		if t.WorkspaceID != wsID {
-			return autocounter.ErrNoResults
-		}
-
-		t.Status = autocounter.StatusDisabled
-
-		_, err = tx.Mutate(datastoresdk.NewUpdate(key, &t))
+	var t autocounter.Table
+	err := c.ds.Get(ctx, key, &t)
+	switch {
+	case err == datastoresdk.ErrNoSuchEntity:
+		return autocounter.ErrNoResults
+	case err != nil:
 		return err
-	})
+	}
+
+	if t.WorkspaceID != wsID {
+		return autocounter.ErrNoResults
+	}
+
+	t.Status = autocounter.StatusDisabled
+
+	_, err = c.ds.Mutate(ctx, datastoresdk.NewUpdate(key, &t))
 	return err
 }
 
