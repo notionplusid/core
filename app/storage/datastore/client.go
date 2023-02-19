@@ -109,27 +109,41 @@ func (c *Client) Workspaces(ctx context.Context) ([]autocounter.Workspace, error
 	return res, nil
 }
 
+// Tables returns all the available instances.
+func (c *Client) Tables(ctx context.Context) ([]autocounter.Table, error) {
+	var res []autocounter.Table
+	_, err := c.ds.GetAll(ctx, datastoresdk.NewQuery(tableKey), &res)
+	switch {
+	case err == datastoresdk.ErrNoSuchEntity:
+		return nil, autocounter.ErrNoResults
+	case err != nil:
+		return nil, err
+	}
+
+	return res, nil
+}
+
 // DisableTable instance.
-func (c *Client) DisableTable(ctx context.Context, wsID, tID string) error {
+func (c *Client) DisableTable(ctx context.Context, wsID, tID string) (autocounter.Table, error) {
 	key := datastoresdk.NameKey(tableKey, tID, nil)
 
 	var t autocounter.Table
 	err := c.ds.Get(ctx, key, &t)
 	switch {
 	case err == datastoresdk.ErrNoSuchEntity:
-		return autocounter.ErrNoResults
+		return autocounter.Table{}, autocounter.ErrNoResults
 	case err != nil:
-		return err
+		return autocounter.Table{}, err
 	}
 
 	if t.WorkspaceID != wsID {
-		return autocounter.ErrNoResults
+		return autocounter.Table{}, autocounter.ErrNoResults
 	}
 
 	t.Status = autocounter.StatusDisabled
 
 	_, err = c.ds.Mutate(ctx, datastoresdk.NewUpdate(key, &t))
-	return err
+	return t, err
 }
 
 // StoreTable instance.

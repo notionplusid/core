@@ -169,7 +169,8 @@ func (t *Table) ListAllActive(ctx context.Context, workspaceID string) ([]autoco
 
 // Disable the Table from the Workspace by the table ID.
 func (t *Table) Disable(ctx context.Context, wsID string, tableID string) error {
-	return t.s.DisableTable(ctx, wsID, tableID)
+	_, err := t.s.DisableTable(ctx, wsID, tableID)
+	return err
 }
 
 // Fill the Table within provided Workspace with autoincrementing IDs.

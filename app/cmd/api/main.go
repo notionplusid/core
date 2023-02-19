@@ -16,6 +16,7 @@ import (
 	"github.com/notionplusid/core/app/provider/notion"
 	"github.com/notionplusid/core/app/service"
 	"github.com/notionplusid/core/app/storage/datastore"
+	"github.com/notionplusid/core/app/storage/inmemcache"
 )
 
 const (
@@ -43,7 +44,19 @@ func main() {
 	}
 	log.Print("Datastore: OK")
 
-	tenant, err := service.NewTenant(ds, notion.ExtConfig{
+	inmem, err := inmemcache.New(ds)
+	if err != nil {
+		log.Fatalf("In-mem cache: %s", err)
+		return
+	}
+	log.Print("In-mem cache: OK")
+	if err := inmem.Sync(ctx); err != nil {
+		log.Fatalf("In-mem cache: couldn't sync: %s", err)
+		return
+	}
+	log.Print("In-mem cache: synced")
+
+	tenant, err := service.NewTenant(inmem, notion.ExtConfig{
 		ClientID:     env.Notion.ClientID,
 		ClientSecret: env.Notion.ClientSecret,
 		RedirectURI:  env.Notion.RedirectURI,
@@ -54,7 +67,7 @@ func main() {
 	}
 	log.Print("Tenant Service: OK")
 
-	table, err := service.NewTable(ds)
+	table, err := service.NewTable(inmem)
 	if err != nil {
 		log.Fatalf("Table Service: %s", err)
 		return

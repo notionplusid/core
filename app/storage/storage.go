@@ -17,8 +17,9 @@ type Storage interface {
 	ProcOldestUpdatedWss(ctx context.Context, count int64, procWss ProcWssFunc) error
 	RemoveWorkspace(ctx context.Context, wsID string) error
 
+	Tables(ctx context.Context) ([]autocounter.Table, error)
 	StoreTable(ctx context.Context, workspaceID string, table autocounter.Table) (autocounter.Table, error)
-	DisableTable(ctx context.Context, wsID, tableID string) error
+	DisableTable(ctx context.Context, wsID, tableID string) (autocounter.Table, error)
 	ActiveTables(ctx context.Context, workspaceID string, tableIDs []string) ([]string, error)
 	ListAllActiveTables(ctx context.Context, workspaceID string) ([]autocounter.Table, error)
 	RemoveTablesFromWS(ctx context.Context, wsID string) error
