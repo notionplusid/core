@@ -63,6 +63,8 @@ func (i *Instance) Sync(ctx context.Context) error {
 	}
 	i.c.ts = ts
 
+	log.Println("Inmemcache: sync done")
+
 	return nil
 }
 
@@ -77,10 +79,12 @@ func (i *Instance) Workspace(ctx context.Context, id string) (autocounter.Worksp
 
 	for _, item := range i.c.wss {
 		if item.ID == id {
+			log.Printf("Inmemcache: ws %s returned", item.ID)
 			return item, nil
 		}
 	}
 
+	log.Printf("Inmemcache: ws %s not found", id)
 	return autocounter.Workspace{}, autocounter.ErrNoResults
 }
 
@@ -89,6 +93,8 @@ func (i *Instance) Workspaces(ctx context.Context) ([]autocounter.Workspace, err
 	i.c.mu.RLock()
 	defer i.c.mu.RUnlock()
 
+	log.Printf("Inmemcache: %d wss returned", len(i.c.wss))
+
 	return append([]autocounter.Workspace{}, i.c.wss...), nil
 }
 
@@ -96,6 +102,8 @@ func (i *Instance) Workspaces(ctx context.Context) ([]autocounter.Workspace, err
 func (i *Instance) Tables(ctx context.Context) ([]autocounter.Table, error) {
 	i.c.mu.RLock()
 	defer i.c.mu.RUnlock()
+
+	log.Printf("Inmemcache: %d tables returned", len(i.c.ts))
 
 	return append([]autocounter.Table{}, i.c.ts...), nil
 }
@@ -114,12 +122,14 @@ func (i *Instance) StoreWorkspace(ctx context.Context, ws autocounter.Workspace)
 	for n, item := range i.c.wss {
 		if item.ID == ws.ID {
 			i.c.wss[n] = ws
+			log.Printf("Inmemcache: ws %s overwritten", ws.ID)
 			return ws, nil
 		}
 	}
 	// if doesn't exist yet - save it to cache.
 	i.c.wss = append(i.c.wss, ws)
 
+	log.Printf("Inmemcache: ws %s saved to cache", ws.ID)
 	return ws, nil
 }
 
@@ -128,7 +138,9 @@ func (i *Instance) StoreWorkspace(ctx context.Context, ws autocounter.Workspace)
 // while updating the cache.
 func (i *Instance) ProcOldestUpdatedWss(ctx context.Context, count int64, procWss storage.ProcWssFunc) error {
 	// if cache has some old items instances - we run proper sync until we have cache in the most recent state.
+	log.Printf("Inmemcache: cache old is %t; oldest %s; now %s", i.c.oldestProcessedWs().Add(defaultCacheSyncTimeout).Before(time.Now()), i.c.oldestProcessedWs(), time.Now())
 	if i.c.oldestProcessedWs().Add(defaultCacheSyncTimeout).Before(time.Now()) {
+		log.Println("Inmemcache: cache is old")
 		defer i.Sync(ctx) // nolint: errcheck
 		return i.s.ProcOldestUpdatedWss(ctx, count, func(ctx context.Context, wss ...autocounter.Workspace) error {
 			defer func() {
@@ -145,6 +157,7 @@ func (i *Instance) ProcOldestUpdatedWss(ctx context.Context, count int64, procWs
 	i.c.mu.RLock()
 	wss := append([]autocounter.Workspace{}, i.c.wss...)
 	i.c.mu.RUnlock()
+	log.Printf("Inmemcache: proc: %d wss copied from cache", len(wss))
 
 	// if cache is relatively recent - make the call purely from cache.
 	for _, ws := range wss {
@@ -152,7 +165,7 @@ func (i *Instance) ProcOldestUpdatedWss(ctx context.Context, count int64, procWs
 			log.Printf("In-mem cache: couldn't update workspace %s: %s", ws.ID, err)
 		}
 	}
-	return nil
+	return procWss(ctx, wss...)
 }
 
 func (c *cache) updateWs(ws autocounter.Workspace) error {
