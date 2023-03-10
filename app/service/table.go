@@ -13,7 +13,6 @@ import (
 )
 
 const defaultBatchSize = 100
-const defaultUpdateChunkSize = 3
 
 // Table service.
 type Table struct {
@@ -169,7 +168,8 @@ func (t *Table) ListAllActive(ctx context.Context, workspaceID string) ([]autoco
 
 // Disable the Table from the Workspace by the table ID.
 func (t *Table) Disable(ctx context.Context, wsID string, tableID string) error {
-	return t.s.DisableTable(ctx, wsID, tableID)
+	_, err := t.s.DisableTable(ctx, wsID, tableID)
+	return err
 }
 
 // Fill the Table within provided Workspace with autoincrementing IDs.
@@ -232,6 +232,7 @@ func (t *Table) Fill(ctx context.Context, tableID string, ws autocounter.Workspa
 	defer cancel()
 
 	// for loop until context is cancelled.
+	wg := &sync.WaitGroup{}
 	var cursor string
 	for {
 		select {
@@ -259,65 +260,38 @@ func (t *Table) Fill(ctx context.Context, tableID string, ws autocounter.Workspa
 		}
 
 		// split into chunks
-		chunks := chunkSlice(res.Result, defaultUpdateChunkSize)
-		for _, ch := range chunks {
-			wg := &sync.WaitGroup{}
-			for _, p := range ch {
-				wg.Add(1)
-
-				select {
-				case <-ctx.Done():
-					return ctx.Err()
-				default:
-				}
-
-				counter++
-				go func(num float64, pageID string, done func()) {
-					defer done()
-
-					_, err := notionCli.PatchPage(ctx, pageID, notion.PatchPageReq{
-						Properties: map[string]notion.PageProperty{
-							table.ParamName: {
-								Type:   "number",
-								Number: &num,
-							},
-						},
-					})
-					if err != nil {
-						log.Printf("error: %s", err)
-						cancel()
-					}
-				}(float64(counter), p.ID, wg.Done)
+		for _, p := range res.Result {
+			wg.Add(1)
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			default:
 			}
 
-			wg.Wait()
+			counter++
+			go func(num float64, pageID string, done func()) {
+				defer done()
+				_, err := notionCli.PatchPage(ctx, pageID, notion.PatchPageReq{
+					Properties: map[string]notion.PageProperty{
+						table.ParamName: {
+							Type:   "number",
+							Number: &num,
+						},
+					},
+				})
+				if err != nil {
+					log.Printf("error: %s", err)
+					cancel()
+				}
+			}(float64(counter), p.ID, wg.Done)
 		}
 		if !res.HasMore {
+			wg.Wait()
 			return nil
 		}
 
 		cursor = *res.NextCursor
 	}
-}
-
-func chunkSlice(slice []notion.Page, chunkSize int) [][]notion.Page {
-	var chunks [][]notion.Page
-	for {
-		if len(slice) == 0 {
-			break
-		}
-
-		// necessary check to avoid slicing beyond
-		// slice capacity
-		if len(slice) < chunkSize {
-			chunkSize = len(slice)
-		}
-
-		chunks = append(chunks, slice[0:chunkSize])
-		slice = slice[chunkSize:]
-	}
-
-	return chunks
 }
 
 // NonActiveDiff returns a list of tables that aren't registered or not active for the autofill.

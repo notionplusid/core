@@ -16,10 +16,13 @@ import (
 	"github.com/notionplusid/core/app/provider/notion"
 	"github.com/notionplusid/core/app/service"
 	"github.com/notionplusid/core/app/storage/datastore"
+	"github.com/notionplusid/core/app/storage/inmemcache"
 )
 
 const (
 	shutdownTO = 10 * time.Second
+
+	defaultMaxLoopExecTime = 60 * time.Second
 )
 
 func main() {
@@ -43,7 +46,19 @@ func main() {
 	}
 	log.Print("Datastore: OK")
 
-	tenant, err := service.NewTenant(ds, notion.ExtConfig{
+	inmem, err := inmemcache.New(ds)
+	if err != nil {
+		log.Fatalf("In-mem cache: %s", err)
+		return
+	}
+	log.Print("In-mem cache: OK")
+	if err := inmem.Sync(ctx); err != nil {
+		log.Fatalf("In-mem cache: couldn't sync: %s", err)
+		return
+	}
+	log.Print("In-mem cache: synced")
+
+	tenant, err := service.NewTenant(inmem, notion.ExtConfig{
 		ClientID:     env.Notion.ClientID,
 		ClientSecret: env.Notion.ClientSecret,
 		RedirectURI:  env.Notion.RedirectURI,
@@ -54,7 +69,7 @@ func main() {
 	}
 	log.Print("Tenant Service: OK")
 
-	table, err := service.NewTable(ds)
+	table, err := service.NewTable(inmem)
 	if err != nil {
 		log.Fatalf("Table Service: %s", err)
 		return
@@ -80,17 +95,17 @@ func main() {
 
 	go func(ctx context.Context, procWssCount int64) {
 		log.Printf("Worker: started")
-		var after <-chan time.Time
 		for {
-			after = time.After(2 * time.Second)
-			if err := tenant.ProcOldestUpdated(ctx, procWssCount, table.ProcWs); err != nil {
+			ctxto, cancel := context.WithTimeout(ctx, defaultMaxLoopExecTime)
+			if err := tenant.ProcOldestUpdated(ctxto, procWssCount, table.ProcWs); err != nil {
 				log.Printf("Worker: couldn't process tables: %s", err)
 			}
+			cancel()
 
 			select {
 			case <-ctx.Done():
 				return
-			case <-after:
+			default:
 			}
 		}
 	}(ctx, env.Notion.ProcWss)
