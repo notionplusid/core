@@ -22,7 +22,7 @@ import (
 const (
 	shutdownTO = 10 * time.Second
 
-	defaultMaxLoopExecTime = 30 * time.Second
+	defaultMaxLoopExecTime = 60 * time.Second
 )
 
 func main() {
