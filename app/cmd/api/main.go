@@ -21,8 +21,6 @@ import (
 
 const (
 	shutdownTO = 10 * time.Second
-
-	defaultMaxLoopExecTime = 60 * time.Second
 )
 
 func main() {
@@ -96,11 +94,9 @@ func main() {
 	go func(ctx context.Context, procWssCount int64) {
 		log.Printf("Worker: started")
 		for {
-			ctxto, cancel := context.WithTimeout(ctx, defaultMaxLoopExecTime)
-			if err := tenant.ProcOldestUpdated(ctxto, procWssCount, table.ProcWs); err != nil {
+			if err := tenant.ProcOldestUpdated(ctx, procWssCount, table.ProcWs); err != nil {
 				log.Printf("Worker: couldn't process tables: %s", err)
 			}
-			cancel()
 
 			select {
 			case <-ctx.Done():
