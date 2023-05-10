@@ -97,6 +97,7 @@ func main() {
 			err := tenant.ProcOldestUpdated(ctx, procWssCount, table.ProcWs)
 			switch {
 			case errors.Is(err, context.DeadlineExceeded):
+			case errors.Is(err, context.Canceled):
 			case err != nil:
 				log.Printf("Worker: couldn't process tables: %s", err)
 			}

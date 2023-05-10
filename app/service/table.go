@@ -6,13 +6,17 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"time"
 
 	autocounter "github.com/notionplusid/core/app"
 	"github.com/notionplusid/core/app/provider/notion"
 	"github.com/notionplusid/core/app/storage"
 )
 
-const defaultBatchSize = 100
+const (
+	defaultBatchSize = 100
+	defaultProcTO    = 20 * time.Second
+)
 
 // Table service.
 type Table struct {
@@ -279,7 +283,10 @@ func (t *Table) Fill(ctx context.Context, tableID string, ws autocounter.Workspa
 						},
 					},
 				})
-				if err != nil {
+				switch {
+				case errors.Is(err, context.DeadlineExceeded):
+				case errors.Is(err, context.Canceled):
+				case err != nil:
 					log.Printf("error: %s", err)
 				}
 			}(float64(counter), p.ID, wg.Done)
@@ -355,6 +362,9 @@ func (t *Table) RegisterConc(ctx context.Context, ts []autocounter.Table) {
 
 // ProcWs in concurrent manner.
 func (t *Table) ProcWs(ctx context.Context, ws autocounter.Workspace) (autocounter.Workspace, error) {
+	ctx, cancel := context.WithTimeout(ctx, defaultProcTO)
+	defer cancel()
+
 	ts, err := t.ListAllActive(ctx, ws.ID)
 	switch {
 	case err == autocounter.ErrNoResults:

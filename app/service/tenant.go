@@ -6,14 +6,11 @@ import (
 	"fmt"
 	"log"
 	"sync"
-	"time"
 
 	autocounter "github.com/notionplusid/core/app"
 	"github.com/notionplusid/core/app/provider/notion"
 	"github.com/notionplusid/core/app/storage"
 )
-
-const defaultLoopTO = 20 * time.Second
 
 // ProcWsFunc is the expected handler for the workspace processing.
 type ProcWsFunc func(ctx context.Context, ws autocounter.Workspace) (autocounter.Workspace, error)
@@ -81,8 +78,6 @@ func (t *Tenant) UnregisterWorkspace(ctx context.Context, wsID string) error {
 
 // ProcOldestUpdated consistently processes the tenants that were processed the longest ago.
 func (t *Tenant) ProcOldestUpdated(ctx context.Context, count int64, procWs ProcWsFunc) error {
-	ctx, cancel := context.WithTimeout(ctx, defaultLoopTO)
-	defer cancel()
 	return t.s.ProcOldestUpdatedWss(ctx, count, func(ctx context.Context, wss ...autocounter.Workspace) error {
 		wg := &sync.WaitGroup{}
 		for _, ws := range wss {
