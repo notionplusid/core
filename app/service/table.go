@@ -281,7 +281,6 @@ func (t *Table) Fill(ctx context.Context, tableID string, ws autocounter.Workspa
 				})
 				if err != nil {
 					log.Printf("error: %s", err)
-					cancel()
 				}
 			}(float64(counter), p.ID, wg.Done)
 		}
