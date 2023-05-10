@@ -94,7 +94,10 @@ func main() {
 	go func(ctx context.Context, procWssCount int64) {
 		log.Printf("Worker: started")
 		for {
-			if err := tenant.ProcOldestUpdated(ctx, procWssCount, table.ProcWs); err != nil {
+			err := tenant.ProcOldestUpdated(ctx, procWssCount, table.ProcWs)
+			switch {
+			case errors.Is(err, context.DeadlineExceeded):
+			case err != nil:
 				log.Printf("Worker: couldn't process tables: %s", err)
 			}
 
