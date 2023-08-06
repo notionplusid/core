@@ -1,3 +1,6 @@
+# DEPRECATED
+> PLEASE REFER TO [Notion's Unique ID](https://www.notion.so/help/unique-id)
+
 # Notion Plus ID
 
 > More information at [https://notionplusid.app](https://notionplusid.app)
